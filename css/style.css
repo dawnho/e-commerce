@@ -1,0 +1,83 @@
+text {
+  font: 12px sans-serif;
+}
+
+.container {
+  float: center;
+}
+
+#vis {
+  width: 940px;
+  height: 400px;
+  clear: both;
+  margin-bottom: 10px;
+}
+
+footer {
+  text-align: center;
+}
+
+.color{
+  width: 10px;
+  height: 10px;
+}
+
+#legend .series {
+  cursor: pointer;
+}
+
+#legend .disabled circle {
+  fill-opacity: 0;
+}
+
+#legend{
+  padding-top: 20px;
+}
+
+#legend .item {
+  float: left;
+  margin-right: 10px;
+  line-height: 30px;
+}
+/*
+#legend div {
+  display: inline-block;
+  margin: 0 2px;
+}*/
+
+#pie {
+  margin-left: 90px;
+  display: inline-block;
+}
+
+svg {
+  font-size: 12px;
+}
+
+.foreground path {
+  fill: none;
+  stroke-opacity: .5;
+  stroke-width: 1.5px;
+}
+
+.foreground path.fade {
+  stroke: #000;
+  stroke-opacity: .05;
+}
+
+.brush .extent {
+  fill-opacity: .3;
+  stroke: #fff;
+  shape-rendering: crispEdges;
+}
+
+.axis line, .axis path {
+  fill: none;
+  stroke: #000;
+  shape-rendering: crispEdges;
+}
+
+.axis text {
+  text-shadow: 0 1px 0 #fff;
+  cursor: move;
+}

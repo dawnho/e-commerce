@@ -10,11 +10,10 @@ window.createParallel = function () {
 
   function chart() {
 	  var x = d3.scale.ordinal().domain(axisLabels).rangePoints([0, chartWidth]),
-    		y = {};
+    	  y = {};
 
 		var line = d3.svg.line().interpolate("cardinal").tension(0.95),
 		    axis = d3.svg.axis().orient("left"),
-		    legend,
 		    background,
 		    foreground;
 
@@ -26,8 +25,9 @@ window.createParallel = function () {
 
 	  axisLabels.forEach(function(d) {
 	    y[d] = d3.scale.linear()
-	      .domain(d3.extent(data, function(p) { return +p[d]; }))
+	      .domain([d3.min(data, function(p) { return +p[d]; }), 1.0])
 	      .range([chartHeight, 0]);
+
 	    y[d].brush = d3.svg.brush()
 	      .y(y[d])
 	      .on("brush", brush);
@@ -57,50 +57,34 @@ window.createParallel = function () {
 		  .style("stroke", function(d, i) {return color[i % color.length]});
 
 
-	  // Add a group element for each distributor.
-	  var g = svg.selectAll(".distributor")
-		  .data(axisLabels)
-		  .enter().append("svg:g")
-		  .attr("class", "distributor")
+	  // Add a group element for each column.
+	  var g = svg.selectAll(".column")
+		.data(axisLabels)
+		.enter().append("svg:g")
+		  .attr("class", "column")
 		  .attr("transform", function(d) { return "translate(" + x(d) + ")"; })
 		  .call(d3.behavior.drag()
-	  	.origin(function(d) { return {x: x(d)}; })
-	  	.on("dragstart", dragstart)
-	  	.on("drag", drag)
-	  	.on("dragend", dragend));
+		  	.origin(function(d) { return {x: x(d)}; })
+		  	.on("dragstart", dragstart)
+		  	.on("drag", drag)
+		  	.on("dragend", dragend));
 
 	  // Add an axis and title.
 	  g.append("svg:g")
 		  .attr("class", "axis")
 		  .each(function(d) { d3.select(this).call(axis.scale(y[d])); })
 		  .append("svg:text")
-		  .attr("text-anchor", "middle")
-		  .attr("y", -9)
-		  .text(String);
+			  .attr("text-anchor", "middle")
+			  .attr("y", -9)
+			  .text(String);
 
-		/*var nulls = svg.selectAll(".axisNum");
-		console.log(nulls);
-		for (var i = 0; i < nulls.length; i++) {
-			if ((i % 8) == 0) {
-				console.log(nulls[i]);
-				nulls[i].textContent = ("Null");
-			}
-		}*/
-		//console.log(nulls);
-			//.attr("fill", "none")
-			//.text("Null");
-
-		/*g.append("svg:rect")
-			.attr("x", -35)
-			.attr("y", chartHeight-6)
-			.attr("width", 30)
-			.attr("height", 10)
-			.attr("fill", "white");
-
-		g.append("svg:text")
-			.attr("text-anchor", "end")
-			.attr("y", chartHeight+4)
-			.text("Null   -");*/
+		g.selectAll(".axis")
+			.select("g")
+			.attr("class", "nullGroup");
+			
+		g.selectAll(".nullGroup")
+			.select("text")
+			.text("Null");		
 
 	  // Add a brush for each axis.
 	  g.append("svg:g")
@@ -124,7 +108,7 @@ window.createParallel = function () {
 	  function dragend(d) {
 	  	x.domain(axisLabels).rangePoints([0, chartWidth]);
 	  	var t = d3.transition().duration(500);
-	  	t.selectAll(".distributor").attr("transform", function(d) { return "translate(" + x(d) + ")"; });
+	  	t.selectAll(".column").attr("transform", function(d) { return "translate(" + x(d) + ")"; });
 	  	t.selectAll(".foreground path").attr("d", path);
 	  }
 

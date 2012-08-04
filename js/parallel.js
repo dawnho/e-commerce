@@ -6,11 +6,13 @@ window.createParallel = function () {
     color = d3.scale.category_custom().range(),
     chartWidth = width - margin[1] - margin[3],
     chartHeight = height - margin[0] - margin[2],
-    axisLabels = [];
+    axisLabels = [],
+    dimension,
+    group,
+    brushDirty;
 
   function chart() {
-	  var x = d3.scale.ordinal().domain(axisLabels).rangePoints([0, chartWidth]),
-    	  y = {};
+	  
 
 		var line = d3.svg.line().interpolate("cardinal").tension(0.95),
 		    axis = d3.svg.axis().orient("left"),
@@ -23,6 +25,16 @@ window.createParallel = function () {
 	        .append("svg:g")
 	        .attr("transform", "translate(" + margin[3] + "," + margin[0] + ")");
 
+	  d3.select(".title").append("a")
+      .attr("href", "javascript:reset()")
+      .attr("class", "reset")
+      .text("reset")
+      .style("display", "none");
+
+	  newData = customNullY(data);
+	  var x = d3.scale.ordinal().domain(axisLabels).rangePoints([0, chartWidth]),
+    	  y = {};
+
 	  axisLabels.forEach(function(d) {
 	    y[d] = d3.scale.linear()
 	      .domain([d3.min(data, function(p) { return +p[d]; }), 1.0])
@@ -31,6 +43,8 @@ window.createParallel = function () {
 	    y[d].brush = d3.svg.brush()
 	      .y(y[d])
 	      .on("brush", brush);
+
+	    y[d].brushDirty;
 	  });
 
 	  // Add background lines (the gray lines that remain after a path is hidden.)
@@ -84,7 +98,7 @@ window.createParallel = function () {
 			
 		g.selectAll(".nullGroup")
 			.select("text")
-			.text("Null");		
+			.text("Null");
 
 	  // Add a brush for each axis.
 	  g.append("svg:g")
@@ -94,8 +108,28 @@ window.createParallel = function () {
 		  .attr("x", -8)
 		  .attr("width", 16);
 
+	  //sets nulls to a custom Y-value
+	  function customNullY(data) {
+	  	newData = [];
+
+	  	nullValues = {"Amazon":0.6, "Buy.com":0.55, "HSN":0.78, "JCP":0.65, "Macy\'s":0.76,
+    		"Odotco":0.74, "QVC":0.65, "Sears":0.7, "Target":0.65, "Walmart":0.82};
+
+    	for (var i in data) {
+    		newData[i] = data[i];
+    		for (var key in newData[i]) {
+    			if (newData[i][key] == 'null') {
+    				newData[i][key] = nullValues[key];
+    			}
+    		}
+    	}
+
+    	return newData;
+	  }
+
 	  function dragstart(d) {
 	  	i = axisLabels.indexOf(d);
+	  	console.log(d);
 	  }
 
 	  function drag(d) {

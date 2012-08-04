@@ -17,7 +17,7 @@
 <body>
   <div id="container" class="container">
     <header>
-    <h1>E-commerce Benchmarking</h1>
+    <h1 class="title">E-commerce Benchmarking</h1>
     <div class="row">
       <div class="span9">
         <div id="legend"></div>
@@ -32,8 +32,10 @@
     <div class="row">
       <div class="span12">
         <div id="parallel"></div>
-        <div id="table">
-          <div class="groups"></div>
+        <div id="lists">
+          <div id="product-list">
+            <div class="groups"></div>
+          </div>
         </div>
       </div>
     </div>
@@ -53,8 +55,9 @@
   <script src="js/pie.js"></script>
   <script src="js/legend.js"></script>
   <script src="js/parallel.js"></script>
+  <script src="js/list.js"></script>
   <script>
-    d3.csv("data/ecommerce_benchmarking.csv", function(products) {
+    d3.csv("data/ecommerce_data.csv", function(products) {
       var productgroups = ['Automotive', 'Baby', 'Books', 'Clothing', 'Computers', 'Electronics',
                          'Health & Personal Care', 'Home & Kitchen', 'Movies & TV', 'Music',
                          'Sports & Outdoors', 'Other/Misc'],
@@ -75,9 +78,10 @@
 
       color = d3.scale.category_custom().range();
 
-      /*var product = crossfilter(products),
+      var product = crossfilter(products),
           all = product.groupAll(),
-          allGroup = product.dimension(function(d) { return d.group; }),
+          group = product.dimension(function(d) { return d.group; }),
+          aGroup = group.group(),
           name = product.dimension(function(d) {return d.name}),
           amazon = product.dimension(function(d) { return d.Amazon; }),
           aGroup = amazon.group(),
@@ -99,87 +103,64 @@
           tGroup = target.group(),
           walmart = product.dimension(function(d) { return d.Walmart; }),
           wGroup = walmart.group();
-*/
+      var parallel_dimensions = [amazon, aGroup, buy_com, bGroup, hsn, hGroup, jcp, jGroup, macys,
+          mGroup, odotco, oGroup, qvc, qGroup, sears, sGroup, target, tGroup, walmart, wGroup];
 
-      // Create a scale and brush for each distributor.
+      var list = d3.selectAll(".list")
+        .data([productList]);
       var pie = piegroups(products, productgroups, color, 'group');
-      var legend = createLegend().data(productgroups).call(legend);
-      var parallel = createParallel().data(products).axisLabels(distributors).call(parallel);
+      var legend = createLegend().data(productgroups).dimension(group).group(aGroup).call(legend);
+      var parallel = createParallel()
+        .data(products)
+        .axisLabels(distributors)
+        .call(parallel);
+        //.on("legendClick", renderAll);
+      
+      var newData = [];
 
-      /*distributors.forEach(function(d) {
+      dispatch.on('legendClick', function(d,i) { 
+        console.log(d,i);
+        newData = group.filterExact(d);
 
-      function productList(div) {
-        var productsByName = nestByGroup.entries(all.top(40));
 
-        div.each(function() {
-          var group = d3.select(this).selectAll(".group")
-              .data(productsByGroup, function(d) { return d.key; });
+        /*
+        d.disabled = !d.disabled;
 
-          var groupEnter = group.enter().append("div")
-              .attr("class", "group");
+        if (!data.filter(function(d) { return !d.disabled }).length) {
+          data.map(function(d) {
+            d.disabled = false;
+            wrap.selectAll('.series').classed('disabled', false);
+            return d;
+          });
+        }
 
-          var product = date.order().selectAll(".product")
-              .data(function(d) { return d.values; }, function(d) { return d.index; });
+        //selection.transition().call(chart);*/
+      });
 
-          var productEnter = product.enter().append("div")
-              .attr("class", "product");
-
-          productEnter.append("div")
-              .attr("class", "amazon")
-              .text(function(d) { return d.Amazon; });
-
-          productEnter.append("div")
-              .attr("class", "amazon")
-              .text(function(d) { return d.Amazon; });v 
-
-          productEnter.append("div")
-              .attr("class", "time")
-              .text(function(d) { return formatTime(d.date); });
-
-          productEnter.append("div")
-              .attr("class", "origin")
-              .text(function(d) { return d.origin; });
-
-          productEnter.append("div")
-              .attr("class", "destination")
-              .text(function(d) { return d.destination; });
-
-          productEnter.append("div")
-              .attr("class", "distance")
-              .text(function(d) { return formatNumber(d.distance) + " mi."; });
-
-          productEnter.append("div")
-              .attr("class", "delay")
-              .classed("early", function(d) { return d.delay < 0; })
-              .text(function(d) { return formatChange(d.delay) + " min."; });
-
-          product.exit().remove();
-
-          product.order();
-        });
-      };*/
-    
-
-    /*
-    _(productgroups).each(function(group, i) {
-      $('#legend').append("<div class='item'><div class='color' style='background: " + color[i % color.length] + "';></div><div class='key'>" + group + "</div></div>");
-    });*/
-
-  /*
-    legend.dispatch.on('legendClick', function(d,i) { 
-      d.disabled = !d.disabled;
-
-      if (!data.filter(function(d) { return !d.disabled }).length) {
-        data.map(function(d) {
-          d.disabled = false;
-          wrap.selectAll('.series').classed('disabled', false);
-          return d;
-        });
+      function render(method) {
+        d3.select(this).call(method);
       }
 
-      selection.transition().call(chart);
-    });*/
+      function renderAll() {
+        parallel(render);
+        list.each(render);
+        d3.select("#active").text(formatNumber(all.value()));
+      }
+
+
+
   });
+
+  window.filter = function(filters) {
+    filters.forEach(function(d, i) { charts[i].filter(d); });
+    renderAll();
+  };
+
+  window.reset = function() {
+    parallel.filter(null);
+    renderAll();
+  };
+
   </script>
 </body>
 </html>

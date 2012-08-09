@@ -108,6 +108,9 @@
             parallel_dimensions[key].filterAll();
           }
         } else {
+          for (key in parallel_dimensions) {
+            parallel_dimensions[key].filterAll();
+          }
           group.filterExact(d);
         }
         parallel.data(group.top(Infinity)).call(parallel);
@@ -119,6 +122,9 @@
       });
 
       parallel.dispatch.on('brushing', function(extents) {
+        for (key in parallel_dimensions) {
+          parallel_dimensions[key].filterAll();
+        }
         for (i in extents) {
           parallel_dimensions[extents[i][0]].filterRange(extents[i][1]);
         }

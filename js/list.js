@@ -5,7 +5,7 @@ window.createList = function () {
       headers = [],
       margin = {top: 0, right: 10, bottom: 20, left: 10},
       width = 940,
-      height = 306,
+      height = 300,
       color
       sortBy = 'name';
   
@@ -58,12 +58,12 @@ window.createList = function () {
         .style("line-height", "1.5em")
         .on("mouseover", function(d){
           d3.select(this).style("background", "#bebebe");
-          d3.selectAll('.line-path').style("display", 'none').style('stroke-opacity', '1');
-          d3.select(".path"+d.index).style("display", null).style("stroke-width", "2.5px");
+          d3.selectAll('.line-path').style("display", 'none');
+          d3.select(".path"+d.index).style("display", null).style("stroke-width", "2.5px").style('stroke-opacity', '1');
         })
         .on("mouseout", function(d){
-          d3.select(this).style("background", null);
-          d3.selectAll('.line-path').style("display", null).style('stroke-opacity', null).style("stroke-width", null);
+          d3.select(this).style("background", '#eee');
+          d3.selectAll('.line-path').style("display", null).style('stroke-opacity', '.7').style("stroke-width", '1.5px');
         });
     var cells = rows.selectAll("td")
       .data(function(row) {

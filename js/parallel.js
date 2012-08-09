@@ -103,6 +103,14 @@ window.createParallel = function () {
 				.select("text")
 				.text("Null");
 
+			g.selectAll(".axis")
+				.select("path")
+				.attr("stroke-width", 1);
+
+			g.selectAll(".tick")
+				.attr("stroke-width", 2);
+
+
 		  // Add a brush for each axis.
 		  g.append("svg:g")
 			  .attr("class", "brush")
@@ -130,7 +138,7 @@ window.createParallel = function () {
 			foreground=foreground.selectAll("path")
 			  .data(newData)
 			  .enter().append("svg:path")
-			  .attr("class", function(d) { return d.group; })
+			  .attr("class", function(d) { return d.group + ' line-path ' + 'path'+d.index; })
 			  .attr("x", function(d) {return })
 			  .attr("d", path)
 			  .style("fill", "none")

@@ -89,7 +89,6 @@ thead.list-head {
 thead.list-head tr{
   display:block;
 }
-\
 
 #list {
   margin-bottom: 40px;
@@ -98,8 +97,8 @@ thead.list-head tr{
 .list-head th {
   text-align: left;
 }
-.list-body {
+/*.list-body {
   display:block;
   height: 20em;
   overflow: auto;
-}
+}*/

@@ -8,9 +8,13 @@ window.createParallel = function () {
     chartHeight = height - margin[0] - margin[2],
     axisLabels = [],
     data,
+    dimensions,
     brushDirty;
 
+  var dispatch = d3.dispatch('brushing', 'empty');
+
   function chart() {
+
 		var foreground = d3.select(".foreground");
 	  var x = d3.scale.ordinal().domain(axisLabels).rangePoints([0, chartWidth]),
 	    	y = {},
@@ -63,7 +67,7 @@ window.createParallel = function () {
 			  .selectAll("path")
 			  .data(newData)
 			  .enter().append("svg:path")
-			  .attr("class", function(d) { return d.group; })
+			  .attr("class", function(d) { return d.group + ' line-path ' + 'path'+d.index; })
 			  .attr("x", function(d) {return })
 			  .attr("d", path)
 			  .style("fill", "none")
@@ -161,7 +165,7 @@ window.createParallel = function () {
 
 	  function dragstart(d) {
 	  	i = axisLabels.indexOf(d);
-	  	console.log(d);
+	  	console.log(i);
 	  }
 
 	  function drag(d) {
@@ -176,6 +180,9 @@ window.createParallel = function () {
 	  	var t = d3.transition().duration(500);
 	  	t.selectAll(".column").attr("transform", function(d) { return "translate(" + x(d) + ")"; });
 	  	t.selectAll(".foreground path").attr("d", path);
+	  	if (y[d].brush.empty()) {
+        dispatch.empty(dimensions[d]);
+	  	}
 	  }
 
 		// Returns the path for a given data point.
@@ -186,14 +193,18 @@ window.createParallel = function () {
 	  // Handles a brush event, toggling the display of foreground lines.
 	  function brush() {
 	    var actives = axisLabels.filter(function(p) { return !y[p].brush.empty(); }),
-	    		extents = actives.map(function(p) { return y[p].brush.extent(); });
+	    		extents = actives.map(function(p) { return y[p].brush.extent(); }),
+	    		extents_out = actives.map(function(p) { return [p, y[p].brush.extent()] });
 	    foreground.classed("fade", function(d) {
 	      return !actives.every(function(p, i) {
 	        return extents[i][0] <= d[p] && d[p] <= extents[i][1];
 	      });
 	    });
+	    dispatch.brushing(extents_out);
 	  }
 	};
+
+	chart.dispatch = dispatch;
 
 	chart.margin = function(_) {
 		if (!arguments.length) return margin;
@@ -228,6 +239,12 @@ window.createParallel = function () {
   chart.data = function(_) {
     if (!arguments.length) return data;
     data = _;
+    return chart;
+  };
+
+  chart.dimensions = function(_) {
+    if (!arguments.length) return dimensions;
+    dimensions = _;
     return chart;
   };
 

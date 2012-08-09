@@ -46,7 +46,6 @@
   <script src="js/libs/d3.layout.min.js"></script>
   <script src="js/libs/d3.csv.min.js"></script>
   <script src="js/libs/underscore.js"></script>
-  <script src="js/libs/backbone.js"></script>
   <script src="js/libs/crossfilter.min.js"></script>
   <script src="js/pie.js"></script>
   <script src="js/legend.js"></script>
@@ -69,7 +68,6 @@
       formatNumber = d3.format('.3g');
 
       products.forEach(function(d,i) {
-        d.index = i;
         d.Amazon = formatNumber(d.Amazon);
         d["Buy.com"] = formatNumber(d["Buy.com"]);
         d["HSN"] = formatNumber(d["HSN"]);
@@ -84,44 +82,52 @@
 
       var product = crossfilter(products),
           group = product.dimension(function(d) { return d.group; }),
-          allGroup = group.group(),
           name = product.dimension(function(d) {return d.name});
-          /*amazon = product.dimension(function(d) { return d.Amazon; }),
-          aGroup = amazon.group(),
+          amazon = product.dimension(function(d) { return d.Amazon; }),
           buy_com = product.dimension(function(d) { return d["Buy.com"]; }),
-          bGroup = buy_com.group(),
           hsn = product.dimension(function(d) { return d.HSN; }),
-          hGroup = hsn.group(),
           jcp = product.dimension(function(d) { return d.JCP; }),
-          jGroup = jcp.group(),
           macys = product.dimension(function(d) { return d["Macy\'s"]; }),
-          mGroup = macys.group(),
           odotco = product.dimension(function(d) { return d.Odotco; }), 
-          oGroup = odotco.group(),
           qvc = product.dimension(function(d) { return d.QVC; }),
-          qGroup = qvc.group(),
           sears = product.dimension(function(d) { return d.Sears; }),
-          sGroup = sears.group(),
           target = product.dimension(function(d) { return d.Target; }),
-          tGroup = target.group(),
-          walmart = product.dimension(function(d) { return d.Walmart; }),
-          wGroup = walmart.group();*/
+          walmart = product.dimension(function(d) { return d.Walmart; });
 
-
-      //var parallel_dimensions = [amazon, aGroup, buy_com, bGroup, hsn, hGroup, jcp, jGroup, macys,
-      //    mGroup, odotco, oGroup, qvc, qGroup, sears, sGroup, target, tGroup, walmart, wGroup];
+      var parallel_dimensions = {'group':group, 'name':name,'Amazon':amazon,  'Buy.com':buy_com, 'HSN':hsn, 'JCP':jcp, 'Macy\'s':macys, 'Odotco':odotco, 'QVC':qvc, 'Sears':sears, 'Target':target, 'Walmart':walmart};
 
       var list = createList().data(products).headers(listHeaders).call(list);
       var pie = piegroups(products, productgroups, color, 'group');
       var legend = createLegend().data(productgroups).color(color).call(legend);
-      var parallel = createParallel().axisLabels(distributors).data(products).color(color).call(parallel);
-
+      var parallel = createParallel().axisLabels(distributors).data(products).color(color).dimensions(parallel_dimensions).call(parallel);
+      
       legend.dispatch.on('legendClick', function(d,i) { 
-        var filter = (d=='All')? null:d;
-        var data = group.filterExact(filter).top(Infinity);
-        parallel.data(data).call(parallel);
-        list.data(data).call(list);
+        if (d == 'All / Reset') {
+          group.filter(null);
+          for (key in parallel_dimensions) {
+            parallel_dimensions[key].filterAll();
+          }
+        } else {
+          group.filterExact(d);
+        }
+        parallel.data(group.top(Infinity)).call(parallel);
+        list.data(group.top(Infinity)).call(list);
+      });
 
+      list.dispatch.on('headerClick', function(d,i) {
+        list.sortBy(d).call(list);
+      });
+
+      parallel.dispatch.on('brushing', function(extents) {
+        for (i in extents) {
+          parallel_dimensions[extents[i][0]].filterRange(extents[i][1]);
+        }
+        list.data(group.top(Infinity)).call(list);
+      });
+
+      parallel.dispatch.on('empty', function(dimension) {
+        dimension.filter(null);
+        list.data(group.top(Infinity)).call(list);
       });
   });
 

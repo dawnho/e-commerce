@@ -6,13 +6,12 @@ window.createLegend = function () {
       color,
       data = [];
   
-  //color.push('#555'); //for the 'All' button
-  dispatch = d3.dispatch('legendClick');
+  var dispatch = d3.dispatch('legendClick');
 
 
   function chart() {
     var legendData = data.slice(0);
-    legendData.push('All');
+    legendData.push('All / Reset');
     var wrap = d3.select('#legend').append('svg:svg')
       .attr('class', 'legend')
       .attr('width', width)
@@ -77,21 +76,7 @@ window.createLegend = function () {
         });
       return chart;
     };
-/*
-  chart.dataAreSet = function() {
-    return _dimension != undefined && _group != undefined;
-  };
 
-  chart.turnOnControls = function() {
-    chart.selectAll(".reset").style("display", null);
-    chart.selectAll(".filter").text(_filterPrinter(chart.filter())).style("display", null);
-  };
-
-  chart.turnOffControls = function() {
-    chart.selectAll(".reset").style("display", "none");
-    chart.selectAll(".filter").style("display", "none").text(chart.filter());
-  };
-*/
   chart.margin = function(_) {
     if (!arguments.length) return margin;
     margin = _;
@@ -128,32 +113,6 @@ window.createLegend = function () {
     return chart;
   };
 
-  /*chart.dimension = function(_) {
-    if (!arguments.length) return dimension;
-    dimension = _;
-    return chart;
-  };
-
-  chart.group = function(_) {
-    if (!arguments.length) return group;
-    group = _;
-    return chart;
-  };*/
-/*
-  chart.filter = function(_) {
-    if (!arguments.length) return filter;
-
-    filter = _;
-
-    if (chart.dataAreSet())
-      chart.dimension().filter(_);
-    if (_) {
-      chart.turnOnControls();
-    } else {
-      chart.turnOffControls();
-    }
-  };
-*/
   chart.dispatch = dispatch;
 
   return chart;

@@ -3,30 +3,28 @@ window.createLegend = function () {
   var margin = {top: 10, right: 20, bottom: 10, left: 20},
       width = 700,
       height = 70,
-      color = d3.scale.category_custom().range(),
-      data = [],
-      dimension,
-      group;
-
+      color,
+      data = [];
+  
+  //color.push('#555'); //for the 'All' button
   dispatch = d3.dispatch('legendClick');
 
 
   function chart() {
-
+    var legendData = data.slice(0);
+    legendData.push('All');
     var wrap = d3.select('#legend').append('svg:svg')
       .attr('class', 'legend')
       .attr('width', width)
       .attr('height', height);
     var series = wrap.selectAll('.series')
-      .data(data);
+      .data(legendData);
     var seriesEnter = series.enter().append('svg:g').attr('class', function(d){return 'series '+ d;})
-      .on('click', function(d,i) {
-        dispatch.legendClick(d,i);
-      });
+      .on('click', function(d,i) { dispatch.legendClick(d,i); });
 
     seriesEnter.append('svg:circle')
-      .style('fill', function(d,i) { return color[i % color.length] })
-      .style('stroke', function(d,i) { return color[i % color.length] })
+      .style('fill', function(d,i) { return color[d] })
+      .style('stroke', function(d,i) { return color[d] })
       .style('stroke-width', 2)
       .attr('r', 5);
     seriesEnter.append('svg:text')
@@ -38,47 +36,62 @@ window.createLegend = function () {
     series.classed('disabled', function(d) { return d.disabled });
     series.exit().remove();
 
-    //Set legend series locations
-    var seriesWidths = [];
+      //Set legend series locations
+      var seriesWidths = [];
 
-    series.each(function(d,i) {
-      seriesWidths.push(d3.select(this).select('text').node()
+      series.each(function(d,i) {
+        seriesWidths.push(d3.select(this).select('text').node()
           .getComputedTextLength() + 28); // 28 is ~ the width of the circle plus some padding
-    });
+      });
 
-    var seriesPerRow = 0,
-    legendWidth = 0,
-    columnWidths = [];
-
-    while ( legendWidth < width && seriesPerRow < seriesWidths.length) {
-      columnWidths[seriesPerRow] = seriesWidths[seriesPerRow];
-      legendWidth += seriesWidths[seriesPerRow++];
-    }
-
-    while ( legendWidth > width && seriesPerRow > 1 ) {
+      var seriesPerRow = 0,
+      legendWidth = 0,
       columnWidths = [];
-      seriesPerRow--;
 
-      for (k = 0; k < seriesWidths.length; k++) {
-        if (seriesWidths[k] > (columnWidths[k % seriesPerRow] || 0) )
-          columnWidths[k % seriesPerRow] = seriesWidths[k];
+      while ( legendWidth < width && seriesPerRow < seriesWidths.length) {
+        columnWidths[seriesPerRow] = seriesWidths[seriesPerRow];
+        legendWidth += seriesWidths[seriesPerRow++];
       }
 
-      legendWidth = columnWidths.reduce(function(prev, cur, index, array) {
-        return prev + cur;
-      });
-    }
-    var xPositions = [];
-    for (var i = 0, curX = 0; i < seriesPerRow; i++) {
-      xPositions[i] = curX+margin.left+6;
-      curX += columnWidths[i];
-    }
-    series
-    .attr('transform', function(d, i) {
-      return 'translate(' + xPositions[i % seriesPerRow] + ',' + (15 + Math.floor(i / seriesPerRow) * 20) + ')';
-    });
+      while ( legendWidth > width && seriesPerRow > 1 ) {
+        columnWidths = [];
+        seriesPerRow--;
+
+        for (k = 0; k < seriesWidths.length; k++) {
+          if (seriesWidths[k] > (columnWidths[k % seriesPerRow] || 0) )
+            columnWidths[k % seriesPerRow] = seriesWidths[k];
+        }
+
+        legendWidth = columnWidths.reduce(function(prev, cur, index, array) {
+          return prev + cur;
+        });
+      }
+      var xPositions = [];
+      for (var i = 0, curX = 0; i < seriesPerRow; i++) {
+        xPositions[i] = curX+margin.left+6;
+        curX += columnWidths[i];
+      }
+      series
+        .attr('transform', function(d, i) {
+          return 'translate(' + xPositions[i % seriesPerRow] + ',' + (15 + Math.floor(i / seriesPerRow) * 20) + ')';
+        });
+      return chart;
+    };
+/*
+  chart.dataAreSet = function() {
+    return _dimension != undefined && _group != undefined;
   };
 
+  chart.turnOnControls = function() {
+    chart.selectAll(".reset").style("display", null);
+    chart.selectAll(".filter").text(_filterPrinter(chart.filter())).style("display", null);
+  };
+
+  chart.turnOffControls = function() {
+    chart.selectAll(".reset").style("display", "none");
+    chart.selectAll(".filter").style("display", "none").text(chart.filter());
+  };
+*/
   chart.margin = function(_) {
     if (!arguments.length) return margin;
     margin = _;
@@ -115,7 +128,7 @@ window.createLegend = function () {
     return chart;
   };
 
-  chart.dimension = function(_) {
+  /*chart.dimension = function(_) {
     if (!arguments.length) return dimension;
     dimension = _;
     return chart;
@@ -125,8 +138,22 @@ window.createLegend = function () {
     if (!arguments.length) return group;
     group = _;
     return chart;
-  };
+  };*/
+/*
+  chart.filter = function(_) {
+    if (!arguments.length) return filter;
 
+    filter = _;
+
+    if (chart.dataAreSet())
+      chart.dimension().filter(_);
+    if (_) {
+      chart.turnOnControls();
+    } else {
+      chart.turnOffControls();
+    }
+  };
+*/
   chart.dispatch = dispatch;
 
   return chart;

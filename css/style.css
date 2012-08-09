@@ -56,7 +56,7 @@ svg {
 
 .foreground path {
   fill: none;
-  stroke-opacity: .5;
+  stroke-opacity: .7;
   stroke-width: 1.5px;
 }
 
@@ -80,4 +80,26 @@ svg {
 .axis text {
   text-shadow: 0 1px 0 #fff;
   cursor: move;
+}
+
+thead.list-head {
+  width:100%;
+}
+
+thead.list-head tr{
+  display:block;
+}
+\
+
+#list {
+  margin-bottom: 40px;
+}
+
+.list-head th {
+  text-align: left;
+}
+.list-body {
+  display:block;
+  height: 20em;
+  overflow: auto;
 }

@@ -3,7 +3,7 @@
   window.piegroups = function(data, keys, color, group) {
     var self = {};
 
-    // var keys = _(data).chain().groupBy(group).keys().value();
+    var keys = _(data).chain().groupBy(group).keys().value();
 
     var w = 100,
         h = 80,
@@ -20,7 +20,7 @@
     var arcs = svg.selectAll("path")
         .data(donut(count(data)))
       .enter().append("svg:path")
-        .attr("fill", function(d, i) { return color[i % color.length];})//colors[keys[i]]; })
+        .attr("fill", function(d, i) { return color[keys[i]]; })
         .attr("d", arc)
         .each(function(d, i) {
           d3.select(this).append("svg:title").text(keys[i]);
